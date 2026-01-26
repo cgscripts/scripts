@@ -1,5 +1,7 @@
--- fly.luau
-return (function()
+-- FlyModule (ModuleScript)
+local FlyModule = {}
+
+function FlyModule.new()
     local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
     local UserInputService = game:GetService("UserInputService")
@@ -23,6 +25,7 @@ return (function()
         if BG then BG.CFrame = cam.CFrame end
     end
 
+    -- Input Handling
     UserInputService.InputBegan:Connect(function(i,gp)
         if gp then return end
         if i.KeyCode==Enum.KeyCode.W then control.F=1 end
@@ -42,7 +45,8 @@ return (function()
         if i.KeyCode==Enum.KeyCode.LeftControl then control.D=0 end
     end)
 
-    return function(value)
+    -- Fly Toggle Funktion
+    local function Toggle(value)
         flying = value
         if flying then
             Humanoid.PlatformStand = true
@@ -59,4 +63,10 @@ return (function()
             if conn then conn:Disconnect() conn=nil end
         end
     end
-end)()
+
+    return {
+        Toggle = Toggle
+    }
+end
+
+return FlyModule
