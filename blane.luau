@@ -92,37 +92,6 @@ Movement:AddToggle({
 
 task.wait()
 
-local Spin = PlayerTab:AddSection({ Name = "Spinning" })
-
-local spinConnection
-Spin:AddToggle({
-	Name = "Spin",
-	Default = false,
-	Callback = function(v)
-		if v then
-			if spinConnection then return end
-			spinConnection = RunService.RenderStepped:Connect(function(dt)
-				if HRP then
-					HRP.CFrame *= CFrame.Angles(0, math.rad(Settings.Spin_Speed * dt), 0)
-				end
-			end)
-		else
-			if spinConnection then
-				spinConnection:Disconnect()
-				spinConnection = nil
-			end
-		end
-	end
-})
-
-Spin:AddSlider({
-	Name = "Spin Speed",
-	Min = 0, Max = 5000, Default = 1000,
-	Callback = function(v)
-		Settings.Spin_Speed = v
-	end
-})
-
 ----------------------------------------------------------------
 -- CAR TAB
 ----------------------------------------------------------------
