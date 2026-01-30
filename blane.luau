@@ -1,16 +1,9 @@
--- Orion UI bootstrap
+-- Rayfield UI bootstrap
 repeat task.wait() until game:IsLoaded()
 repeat task.wait() until game:GetService("Players").LocalPlayer
 task.wait(1)
 
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
-getgenv()._ORION = OrionLib
-
-pcall(function()
-	if gethui then
-		OrionLib.Parent = gethui()
-	end
-end)
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- Services
 local Players = game:GetService("Players")
@@ -47,77 +40,113 @@ end
 local Settings = { Spin_Speed = 1000 }
 local Configs = {}
 
--- Window
-local Window = OrionLib:MakeWindow({
+----------------------------------------------------------------
+-- WINDOW
+----------------------------------------------------------------
+local Window = Rayfield:CreateWindow({
 	Name = "CgScripts | Blane County",
-	HidePremium = false,
-	SaveConfig = false
+	LoadingTitle = "CgScripts",
+	LoadingSubtitle = "Rayfield Edition",
+	ConfigurationSaving = {
+		Enabled = false
+	}
 })
 
 ----------------------------------------------------------------
 -- PLAYER TAB
 ----------------------------------------------------------------
-local PlayerTab = Window:MakeTab({
-	Name = "Player",
-	Icon = "rbxassetid://2795572800"
-})
+local PlayerTab = Window:CreateTab("Player", 2795572800)
 
-task.wait()
+local Movement = PlayerTab:CreateSection("Movement")
 
-local Movement = PlayerTab:AddSection({ Name = "Movement" })
-
-Movement:AddSlider({
+PlayerTab:CreateSlider({
 	Name = "WalkSpeed",
-	Min = 0, Max = 500, Default = 16,
+	Range = {0, 500},
+	Increment = 1,
+	Suffix = "Speed",
+	CurrentValue = 16,
 	Callback = function(v)
 		if Humanoid then Humanoid.WalkSpeed = v end
 	end
 })
 
-Movement:AddSlider({
+PlayerTab:CreateSlider({
 	Name = "JumpHeight",
-	Min = 0, Max = 100, Default = 7.2,
+	Range = {0, 100},
+	Increment = 1,
+	Suffix = "Height",
+	CurrentValue = 7,
 	Callback = function(v)
 		if Humanoid then Humanoid.JumpHeight = v end
 	end
 })
 
-Movement:AddToggle({
+PlayerTab:CreateToggle({
 	Name = "Fly",
-	Default = false,
+	CurrentValue = false,
 	Callback = function(v)
-		pcall(function() Fly.Toggle(v) end)
+		pcall(function()
+			Fly.Toggle(v)
+		end)
 	end
 })
 
-task.wait()
+----------------------------------------------------------------
+-- SPIN
+----------------------------------------------------------------
+local SpinSection = PlayerTab:CreateSection("Spinning")
+local spinConnection
+
+PlayerTab:CreateToggle({
+	Name = "Spin",
+	CurrentValue = false,
+	Callback = function(v)
+		if v then
+			if spinConnection then return end
+			spinConnection = RunService.RenderStepped:Connect(function(dt)
+				if HRP then
+					HRP.CFrame *= CFrame.Angles(0, math.rad(Settings.Spin_Speed * dt), 0)
+				end
+			end)
+		else
+			if spinConnection then
+				spinConnection:Disconnect()
+				spinConnection = nil
+			end
+		end
+	end
+})
+
+PlayerTab:CreateSlider({
+	Name = "Spin Speed",
+	Range = {0, 5000},
+	Increment = 10,
+	Suffix = "deg/s",
+	CurrentValue = 1000,
+	Callback = function(v)
+		Settings.Spin_Speed = v
+	end
+})
 
 ----------------------------------------------------------------
 -- CAR TAB
 ----------------------------------------------------------------
-task.wait()
+local CarTab = Window:CreateTab("Car", 123358713103625)
 
-local CarTab = Window:MakeTab({
-	Name = "Car",
-	Icon = "rbxassetid://123358713103625"
-})
+local CurrentCarSection = CarTab:CreateSection("Current Car")
+local CurrentCarLabel = CarTab:CreateParagraph("Current Car", "Nil")
 
-task.wait()
-
-local CurrentCarSection = CarTab:AddSection({ Name = "Current Car" })
-local CurrentCarLabel = CurrentCarSection:AddLabel("Nil")
-
-CurrentCarSection:AddButton({
+CarTab:CreateButton({
 	Name = "Update",
 	Callback = function()
 		if Humanoid.SeatPart and Humanoid.SeatPart:IsA("VehicleSeat") then
 			Configs.Car = Humanoid.SeatPart.Parent
-			CurrentCarLabel:Set(getPathAsString(Configs.Car))
+			CurrentCarLabel:Set("Current Car", getPathAsString(Configs.Car))
 		else
-			OrionLib:MakeNotification({
-				Name = "Car not found",
+			Rayfield:Notify({
+				Title = "Car not found",
 				Content = "Sit in driver seat",
-				Time = 2
+				Duration = 2
 			})
 		end
 	end
@@ -126,13 +155,11 @@ CurrentCarSection:AddButton({
 ----------------------------------------------------------------
 -- BODY
 ----------------------------------------------------------------
-task.wait()
+local CarBodySection = CarTab:CreateSection("Body")
 
-local CarBodySection = CarTab:AddSection({ Name = "Body" })
-
-CarBodySection:AddColorpicker({
+CarTab:CreateColorPicker({
 	Name = "Body Color",
-	Default = Color3.fromRGB(255,255,255),
+	Color = Color3.fromRGB(255,255,255),
 	Callback = function(val)
 		local car = Configs.Car
 		if not car then return end
@@ -152,26 +179,23 @@ CarBodySection:AddColorpicker({
 ----------------------------------------------------------------
 -- ENGINE
 ----------------------------------------------------------------
-task.wait()
-
-local CarEngineSection = CarTab:AddSection({ Name = "Engine" })
+local CarEngineSection = CarTab:CreateSection("Engine")
 
 local boostEnabled = false
 local speedValue = 0
-local boostConnection
 
 local function getSeat(car)
 	return car and car:FindFirstChildOfClass("VehicleSeat")
 end
 
-boostConnection = RunService.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
 	if not boostEnabled or speedValue <= 0 then return end
 	local car = Configs.Car
 	local seat = getSeat(car)
 	if not (car and seat) then return end
 
 	local part = car.PrimaryPart or seat
-	local vel = part.AssemblyLinearVelocity or part.Velocity or Vector3.zero
+	local vel = part.AssemblyLinearVelocity
 	local forward = part.CFrame.LookVector
 
 	if seat.Throttle == 0 then return end
@@ -183,17 +207,20 @@ boostConnection = RunService.RenderStepped:Connect(function()
 	)
 end)
 
-CarEngineSection:AddToggle({
+CarTab:CreateToggle({
 	Name = "Speed Boost",
-	Default = false,
+	CurrentValue = false,
 	Callback = function(v)
 		boostEnabled = v
 	end
 })
 
-CarEngineSection:AddSlider({
+CarTab:CreateSlider({
 	Name = "Boost Power",
-	Min = 0, Max = 1000, Default = 0,
+	Range = {0, 1000},
+	Increment = 10,
+	Suffix = "Power",
+	CurrentValue = 0,
 	Callback = function(v)
 		speedValue = v
 	end
@@ -202,9 +229,7 @@ CarEngineSection:AddSlider({
 ----------------------------------------------------------------
 -- LIGHTS
 ----------------------------------------------------------------
-task.wait()
-
-local CarLightSection = CarTab:AddSection({ Name = "Lights" })
+local CarLightSection = CarTab:CreateSection("Lights")
 
 local function forEachHeadlight(fn)
 	local car = Configs.Car
@@ -223,9 +248,9 @@ local function forEachHeadlight(fn)
 	end
 end
 
-CarLightSection:AddColorpicker({
+CarTab:CreateColorPicker({
 	Name = "Light Color",
-	Default = Color3.fromRGB(255,255,255),
+	Color = Color3.fromRGB(255,255,255),
 	Callback = function(v)
 		forEachHeadlight(function(p, l)
 			p.Color = v
@@ -234,9 +259,11 @@ CarLightSection:AddColorpicker({
 	end
 })
 
-CarLightSection:AddSlider({
+CarTab:CreateSlider({
 	Name = "Brightness",
-	Min = 0, Max = 100, Default = 1,
+	Range = {0, 100},
+	Increment = 1,
+	CurrentValue = 1,
 	Callback = function(v)
 		forEachHeadlight(function(_, l)
 			if l then l.Brightness = v end
@@ -244,9 +271,11 @@ CarLightSection:AddSlider({
 	end
 })
 
-CarLightSection:AddSlider({
+CarTab:CreateSlider({
 	Name = "Range",
-	Min = 0, Max = 100, Default = 30,
+	Range = {0, 100},
+	Increment = 1,
+	CurrentValue = 30,
 	Callback = function(v)
 		forEachHeadlight(function(_, l)
 			if l then l.Range = v end
@@ -257,17 +286,9 @@ CarLightSection:AddSlider({
 ----------------------------------------------------------------
 -- TROLLING
 ----------------------------------------------------------------
-task.wait()
+local TrollingTab = Window:CreateTab("Trolling", 72958894100814)
 
-local TrollingTab = Window:MakeTab({
-	Name = "Trolling",
-	Icon = "rbxassetid://72958894100814"
-})
-
-TrollingTab:AddParagraph(
+TrollingTab:CreateParagraph(
 	"Work in Progress",
 	"If you have any ideas, let me know"
 )
-
--- FINAL INIT
-OrionLib:Init()
