@@ -1,5 +1,17 @@
 -- Orion UI
+repeat task.wait() until game:IsLoaded()
+repeat task.wait() until game:GetService("Players").LocalPlayer
+task.wait(1)
+
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
+getgenv()._ORION = OrionLib
+
+pcall(function()
+    if gethui then
+        OrionLib.Parent = gethui()
+    end
+end)
+
 local FlyModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/cgscripts/scripts/main/fly.luau"))()
 
 Fly = FlyModule.new()
