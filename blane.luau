@@ -113,6 +113,8 @@ Movement:AddToggle({
     end
 })
 
+task.wait()
+
 local Spin = PlayerTab:AddSection({
     Name = "Spinning"
 })
