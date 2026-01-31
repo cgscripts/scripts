@@ -59,7 +59,7 @@ local PlayerTab = Window:CreateTab("Player", 2795572800)
 
 local Movement = PlayerTab:CreateSection("Movement")
 
-Movement:CreateSlider({
+PlayerTab:CreateSlider({
 	Name = "WalkSpeed",
 	Range = {0, 500},
 	Increment = 1,
@@ -70,7 +70,7 @@ Movement:CreateSlider({
 	end
 })
 
-Movement:CreateSlider({
+PlayerTab:CreateSlider({
 	Name = "JumpHeight",
 	Range = {0, 100},
 	Increment = 1,
@@ -81,7 +81,7 @@ Movement:CreateSlider({
 	end
 })
 
-Movement:CreateToggle({
+PlayerTab:CreateToggle({
 	Name = "Fly",
 	CurrentValue = false,
 	Callback = function(v)
@@ -97,7 +97,7 @@ Movement:CreateToggle({
 local SpinSection = PlayerTab:CreateSection("Spinning")
 local spinConnection
 
-SpinSection:CreateToggle({
+PlayerTab:CreateToggle({
 	Name = "Spin",
 	CurrentValue = false,
 	Callback = function(v)
@@ -117,7 +117,7 @@ SpinSection:CreateToggle({
 	end
 })
 
-SpinSection:CreateSlider({
+PlayerTab:CreateSlider({
 	Name = "Spin Speed",
 	Range = {0, 5000},
 	Increment = 10,
@@ -134,10 +134,9 @@ SpinSection:CreateSlider({
 local CarTab = Window:CreateTab("Car", 123358713103625)
 
 local CurrentCarSection = CarTab:CreateSection("Current Car")
-print("Created")
 local CurrentCarLabel = CurrentCarSection:CreateLabel("Current Car: Nil", 123358713103625,  Color3.fromRGB(255, 255, 255), false)
 
-CurrentCarSection:CreateButton({
+CarTab:CreateButton({
 	Name = "Update",
 	Callback = function()
 		if Humanoid.SeatPart and Humanoid.SeatPart:IsA("VehicleSeat") then
