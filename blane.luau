@@ -134,14 +134,14 @@ PlayerTab:CreateSlider({
 local CarTab = Window:CreateTab("Car", 123358713103625)
 
 local CurrentCarSection = CarTab:CreateSection("Current Car")
-local CurrentCarLabel = CarTab:CreateParagraph("Current Car", "Nil")
+local CurrentCarLabel = CarTab:CreateLabel("Current Car: Nil")
 
 CarTab:CreateButton({
 	Name = "Update",
 	Callback = function()
 		if Humanoid.SeatPart and Humanoid.SeatPart:IsA("VehicleSeat") then
 			Configs.Car = Humanoid.SeatPart.Parent
-			CurrentCarLabel:Set("Current Car", getPathAsString(Configs.Car))
+			CurrentCarLabel:Set("Current Car: " .. getPathAsString(Configs.Car))
 		else
 			Rayfield:Notify({
 				Title = "Car not found",
