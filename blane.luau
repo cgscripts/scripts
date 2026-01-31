@@ -27,12 +27,16 @@ end)
 
 -- Utils
 local function getPathAsString(object)
-	if not object then return "Nil" end
+	if not object then
+		return "Nil"
+	end
+
 	local t = {}
 	while object and object.Parent do
 		table.insert(t, 1, object.Name)
 		object = object.Parent
 	end
+
 	return table.concat(t, ".")
 end
 
@@ -56,28 +60,31 @@ local Window = Rayfield:CreateWindow({
 -- PLAYER TAB
 ----------------------------------------------------------------
 local PlayerTab = Window:CreateTab("Player", 2795572800)
-
 local Movement = PlayerTab:CreateSection("Movement")
 
 PlayerTab:CreateSlider({
 	Name = "WalkSpeed",
-	Range = {0, 500},
+	Range = { 0, 500 },
 	Increment = 1,
 	Suffix = "Speed",
 	CurrentValue = 16,
 	Callback = function(v)
-		if Humanoid then Humanoid.WalkSpeed = v end
+		if Humanoid then
+			Humanoid.WalkSpeed = v
+		end
 	end
 })
 
 PlayerTab:CreateSlider({
 	Name = "JumpHeight",
-	Range = {0, 100},
+	Range = { 0, 100 },
 	Increment = 1,
 	Suffix = "Height",
 	CurrentValue = 7,
 	Callback = function(v)
-		if Humanoid then Humanoid.JumpHeight = v end
+		if Humanoid then
+			Humanoid.JumpHeight = v
+		end
 	end
 })
 
@@ -102,10 +109,17 @@ PlayerTab:CreateToggle({
 	CurrentValue = false,
 	Callback = function(v)
 		if v then
-			if spinConnection then return end
+			if spinConnection then
+				return
+			end
+
 			spinConnection = RunService.RenderStepped:Connect(function(dt)
 				if HRP then
-					HRP.CFrame *= CFrame.Angles(0, math.rad(Settings.Spin_Speed * dt), 0)
+					HRP.CFrame *= CFrame.Angles(
+						0,
+						math.rad(Settings.Spin_Speed * dt),
+						0
+					)
 				end
 			end)
 		else
@@ -119,7 +133,7 @@ PlayerTab:CreateToggle({
 
 PlayerTab:CreateSlider({
 	Name = "Spin Speed",
-	Range = {0, 5000},
+	Range = { 0, 5000 },
 	Increment = 10,
 	Suffix = "deg/s",
 	CurrentValue = 1000,
@@ -134,14 +148,16 @@ PlayerTab:CreateSlider({
 local CarTab = Window:CreateTab("Car", 123358713103625)
 
 local CurrentCarSection = CarTab:CreateSection("Current Car")
-local CurrentCarLabel = CurrentCarSection:CreateLabel("Current Car: Nil", 123358713103625,  Color3.fromRGB(255, 255, 255), false)
+local CurrentCarLabel = CurrentCarSection:CreateLabel("Current Car: Nil")
 
 CarTab:CreateButton({
 	Name = "Update",
 	Callback = function()
 		if Humanoid.SeatPart and Humanoid.SeatPart:IsA("VehicleSeat") then
 			Configs.Car = Humanoid.SeatPart.Parent
-			CurrentCarLabel:Set("Current Car: " .. getPathAsString(Configs.Car))
+			CurrentCarLabel:Set(
+				"Current Car: " .. getPathAsString(Configs.Car)
+			)
 		else
 			Rayfield:Notify({
 				Title = "Car not found",
@@ -159,12 +175,14 @@ local CarBodySection = CarTab:CreateSection("Body")
 
 CarTab:CreateColorPicker({
 	Name = "Body Color",
-	Color = Color3.fromRGB(255,255,255),
+	Color = Color3.fromRGB(255, 255, 255),
 	Callback = function(val)
 		local car = Configs.Car
 		if not car then return end
+
 		local body = car:FindFirstChild("Body")
 		if not body then return end
+
 		local colorFolder = body:FindFirstChild("Color")
 		if not colorFolder then return end
 
@@ -190,6 +208,7 @@ end
 
 RunService.RenderStepped:Connect(function()
 	if not boostEnabled or speedValue <= 0 then return end
+
 	local car = Configs.Car
 	local seat = getSeat(car)
 	if not (car and seat) then return end
@@ -217,7 +236,7 @@ CarTab:CreateToggle({
 
 CarTab:CreateSlider({
 	Name = "Boost Power",
-	Range = {0, 1000},
+	Range = { 0, 1000 },
 	Increment = 10,
 	Suffix = "Power",
 	CurrentValue = 0,
@@ -234,6 +253,7 @@ local CarLightSection = CarTab:CreateSection("Lights")
 local function forEachHeadlight(fn)
 	local car = Configs.Car
 	if not car then return end
+
 	local body = car:FindFirstChild("Body")
 	local lights = body and body:FindFirstChild("Lights")
 	local head = lights and lights:FindFirstChild("Headlight")
@@ -250,35 +270,41 @@ end
 
 CarTab:CreateColorPicker({
 	Name = "Light Color",
-	Color = Color3.fromRGB(255,255,255),
+	Color = Color3.fromRGB(255, 255, 255),
 	Callback = function(v)
 		forEachHeadlight(function(p, l)
 			p.Color = v
-			if l then l.Color = v end
+			if l then
+				l.Color = v
+			end
 		end)
 	end
 })
 
 CarTab:CreateSlider({
 	Name = "Brightness",
-	Range = {0, 100},
+	Range = { 0, 100 },
 	Increment = 1,
 	CurrentValue = 1,
 	Callback = function(v)
 		forEachHeadlight(function(_, l)
-			if l then l.Brightness = v end
+			if l then
+				l.Brightness = v
+			end
 		end)
 	end
 })
 
 CarTab:CreateSlider({
 	Name = "Range",
-	Range = {0, 100},
+	Range = { 0, 100 },
 	Increment = 1,
 	CurrentValue = 30,
 	Callback = function(v)
 		forEachHeadlight(function(_, l)
-			if l then l.Range = v end
+			if l then
+				l.Range = v
+			end
 		end)
 	end
 })
