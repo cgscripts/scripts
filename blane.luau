@@ -134,7 +134,7 @@ PlayerTab:CreateSlider({
 local CarTab = Window:CreateTab("Car", 123358713103625)
 
 local CurrentCarSection = CarTab:CreateSection("Current Car")
-local CurrentCarLabel = CarTab:CreateLabel("Current Car: Nil")
+local CurrentCarLabel = CurrentCarSection:CreateLabel("Current Car: Nil")
 
 CarTab:CreateButton({
 	Name = "Update",
